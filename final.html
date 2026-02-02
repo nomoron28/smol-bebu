@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🏎️ Be My Co-Pilot? 🏁</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══ RESET & VARS (RED BULL THEME) ═══ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  /* Red Bull Racing Palette */
+  --rb-blue: #0a1a3a;      /* Deep Matte Blue */
+  --rb-red: #d62828;       /* Racing Red */
+  --rb-yellow: #fcbf49;    /* Golden Yellow */
+  --rb-silver: #f8f9fa;    /* Silver/White */
+  --rb-grey: #e9ecef;
+  
+  /* Mapping to Logic */
+  --sun: var(--rb-yellow);
+  --sun-light: #ffffff;
+  --sun-pale: #fff3cd;
+  
+  --pink-hot: var(--rb-red);        /* Primary Actions */
+  --pink-deep: var(--rb-blue);      /* Text & Strong Elements */
+  --pink-mid: #34495e;              /* Soft Blue/Grey */
+  --pink-light: #dfe6ed;            /* Light Accents */
+  
+  --cream: var(--rb-blue);          /* Body Background */
+  --text-body: #ffffff;             /* Text on Body */
+  --text-card: var(--rb-blue);      /* Text on Card */
+  
+  --error-red: #d62828;
+}
+
+body{
+  min-height:100vh;font-family:'Poppins',sans-serif;
+  background:var(--cream); color:var(--text-body);
+  overflow-x:hidden;position:relative;
+  transition: background 0.3s, filter 0.2s;
+}
+
+/* ═══ DRAMATIC FATE RESET MODES ═══ */
+body.apocalypse {
+  background: #110000; /* Deep void red/black */
+  animation: worldShake 0.1s infinite;
+}
+body.apocalypse .card, 
+body.apocalypse .title, 
+body.apocalypse .subtitle {
+  filter: invert(1) grayscale(1) contrast(2);
+  pointer-events: none;
+}
+
+@keyframes worldShake {
+  0% { transform: translate(2px, 2px) rotate(0deg); }
+  10% { transform: translate(-2px, -3px) rotate(-1deg); }
+  20% { transform: translate(-4px, 0px) rotate(1deg); }
+  30% { transform: translate(4px, 3px) rotate(0deg); }
+  40% { transform: translate(2px, -2px) rotate(1deg); }
+  50% { transform: translate(-2px, 3px) rotate(-1deg); }
+  60% { transform: translate(-4px, 1px) rotate(0deg); }
+  70% { transform: translate(4px, 2px) rotate(-1deg); }
+  80% { transform: translate(-2px, -2px) rotate(1deg); }
+  90% { transform: translate(2px, 3px) rotate(0deg); }
+  100% { transform: translate(1px, -1px) rotate(-1deg); }
+}
+
+/* ═══ RESET OVERLAY MESSAGE ═══ */
+.fate-msg {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; opacity: 0;
+}
+.fate-msg.show { opacity: 1; }
+.fate-msg h2 {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(2rem, 5vw, 4rem);
+  color: var(--rb-red);
+  text-shadow: 2px 2px 0px #000, -2px -2px 0px #000;
+  background: black;
+  padding: 1rem 2rem;
+  border: 4px solid var(--rb-red);
+  animation: glitchText 0.2s infinite;
+}
+@keyframes glitchText {
+  0% { transform: translate(0); }
+  20% { transform: translate(-3px, 3px); clip-path: inset(10% 0 80% 0); }
+  40% { transform: translate(3px, -3px); clip-path: inset(40% 0 10% 0); }
+  60% { transform: translate(-3px, 0); clip-path: inset(80% 0 5% 0); }
+  80% { transform: translate(3px, 3px); clip-path: inset(10% 0 60% 0); }
+  100% { transform: translate(0); }
+}
+
+/* ═══ SWIRLING EMOJIS FOR RESET ═══ */
+.swirl-emoji {
+  position: fixed;
+  top: 50%; left: 50%;
+  font-size: 2rem;
+  z-index: 9000;
+  pointer-events: none;
+}
+
+/* ═══ FLOATING EMOJIS BG ═══ */
+.float-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.floatie{
+  position:absolute;opacity:0;
+  animation:floatUp linear infinite;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.3));
+  color: #fff; /* Make floats visible on dark bg */
+}
+@keyframes floatUp{
+  0%{transform:translateY(108vh) rotate(0deg);opacity:0;}
+  8%{opacity:.5;}
+  92%{opacity:.3;}
+  100%{transform:translateY(-12vh) rotate(380deg);opacity:0;}
+}
+
+/* ═══ CARD ═══ */
+.card-wrap{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100vh;padding:2rem 1rem;
+}
+.card{
+  /* Silver/White gradient for contrast against Deep Blue body */
+  background: linear-gradient(155deg, #ffffff 0%, #f0f2f5 50%, #e2e6ea 100%);
+  border-radius:2.6rem;
+  box-shadow:0 24px 64px rgba(0,0,0,.5),0 6px 16px rgba(0,0,0,.3);
+  padding:2.8rem 2.6rem 2.2rem;
+  max-width:500px;width:100%;
+  text-align:center;position:relative;overflow:visible;
+  animation:cardPop .55s cubic-bezier(.34,1.56,.64,1) both;
+  color: var(--text-card);
+}
+@keyframes cardPop{0%{transform:scale(.82);opacity:0;}100%{transform:scale(1);opacity:1;}}
+/* Decorative blobs - subtle silver/gold */
+.card::before{
+  content:'';position:absolute;top:-36px;right:-36px;
+  width:130px;height:130px;
+  background:radial-gradient(circle,rgba(252, 191, 73, 0.4) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;
+}
+.card::after{
+  content:'';position:absolute;bottom:-28px;left:-28px;
+  width:100px;height:100px;
+  background:radial-gradient(circle,rgba(214, 40, 40, 0.3) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;
+}
+
+/* ═══ CENTERPIECE ═══ */
+.center-wrap{
+  width:180px;height:180px;margin:0 auto 1.3rem;
+  position:relative;
+}
+.center-wrap .glow-ring{
+  position:absolute;inset:-6px;border-radius:50%;
+  background:conic-gradient(from 0deg, var(--rb-yellow), var(--rb-red), var(--rb-blue), var(--rb-yellow));
+  z-index:0;animation:spinRing 4s linear infinite;
+  filter:blur(3.5px);opacity:.6;
+}
+@keyframes spinRing{to{transform:rotate(360deg);}}
+.center-inner{
+  position:relative;z-index:1;
+  width:180px;height:180px;border-radius:50%;
+  border:4px solid var(--rb-yellow);
+  box-shadow:0 6px 22px rgba(10, 26, 58, 0.25);
+  background:linear-gradient(135deg, #fff 0%, #f1f3f5 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.emoji-cluster{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px 10px;
+  align-items:center;justify-items:center;
+}
+.emoji-cluster .e{
+  font-size:3.4rem;line-height:1;
+  animation:gentleBob 2.2s ease-in-out infinite;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));
+}
+.emoji-cluster .e:nth-child(1){animation-delay:0s;     font-size:3.6rem;}
+.emoji-cluster .e:nth-child(2){animation-delay:.3s;    font-size:3rem;}
+.emoji-cluster .e:nth-child(3){animation-delay:.55s;   font-size:2.7rem;}
+.emoji-cluster .e:nth-child(4){animation-delay:.15s;   font-size:2.4rem;}
+@keyframes gentleBob{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-4px);}
+}
+
+/* ═══ TEXT ═══ */
+.title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.9rem,5.2vw,2.5rem);
+  font-weight:700;color:var(--rb-blue);
+  line-height:1.2;margin-bottom:.4rem;
+}
+.subtitle{
+  font-size:.90rem;font-weight:300;
+  color:var(--pink-mid);margin-bottom:.7rem;letter-spacing:.3px;
+}
+.divider{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1.1rem;}
+.divider .line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rb-yellow),transparent);}
+.question{
+  font-size:.93rem;color:var(--text-card);
+  margin-bottom:1.5rem;font-weight:300;line-height:1.75;
+}
+.question strong{color:var(--rb-red);}
+
+/* ═══ BUTTON ARENA ═══ */
+.btn-arena{position:relative;width:100%;height:108px;}
+.btn{
+  position:absolute;
+  padding:.82rem 2.1rem;border:none;border-radius:50px;
+  font-family:'Poppins',sans-serif;font-size:1.02rem;font-weight:600;
+  cursor:pointer;user-select:none;-webkit-user-select:none;
+}
+/* YES - Racing Red */
+.btn-yes{
+  left:50%;top:50%;transform:translate(-50%,-50%);
+  background:linear-gradient(135deg, var(--rb-red), #b91c1c);
+  color:#fff;box-shadow:0 6px 20px rgba(214, 40, 40, 0.4);
+  animation:yPulse 1.5s ease-in-out infinite;
+  z-index:2;transition:transform .15s;
+}
+.btn-yes:hover{transform:translate(-50%,-50%) scale(1.1);}
+@keyframes yPulse{
+  0%,100%{box-shadow:0 6px 20px rgba(214, 40, 40, 0.4);}
+  50%{box-shadow:0 6px 32px rgba(214, 40, 40, 0.65);}
+}
+/* NO - Yellow/Gold */
+.btn-no{
+  background:linear-gradient(135deg, var(--rb-yellow), #f59f00);
+  color: #5c3a00; font-weight:600;
+  box-shadow:0 4px 12px rgba(252, 191, 73, 0.4);
+  z-index:1;
+  transition:left .12s cubic-bezier(.2,0,.8,1),top .12s cubic-bezier(.2,0,.8,1),
+             font-size .24s,padding .24s,opacity .28s, background .3s, color .3s;
+  white-space: nowrap;
+}
+
+/* miss text */
+.miss-text{
+  font-size:.76rem;color:var(--rb-red);
+  margin-top:.55rem;min-height:1rem;
+  font-style:italic;opacity:.82;text-align:center;
+}
+
+/* ═══ FIREWORKS CANVAS ═══ */
+#fw-canvas{position:fixed;inset:0;z-index:100;pointer-events:none;}
+
+/* ═══ F1 RACE LAYER ═══ */
+.race-layer{
+  position:fixed;inset:0;z-index:98;
+  pointer-events:none;overflow:hidden;
+  opacity:0;transition:opacity .45s;
+}
+.race-layer.show{opacity:1;}
+
+/* track - Dark Asphalt */
+.track{
+  position:absolute;bottom:0;left:0;right:0;height:140px;
+  background:linear-gradient(180deg,#1a1a1a 0%,#2c2c2c 30%,#1a1a1a 30%,#1a1a1a 32%,#0f0f0f 32%,#0f0f0f 100%);
+}
+.track-line{
+  position:absolute;top:30px;left:0;right:0;height:2px;
+  background:repeating-linear-gradient(90deg,#fff 0px,#fff 28px,transparent 28px,transparent 44px);
+  opacity:.7;
+}
+/* checkered finish */
+.checkered{
+  position:absolute;right:0;top:0;bottom:0;width:52px;
+  background:repeating-linear-gradient(
+    180deg,
+    repeating-linear-gradient(90deg,#fff 0px,#fff 13px,#222 13px,#222 26px) 0px,
+    repeating-linear-gradient(90deg,#fff 0px,#fff 13px,#222 13px,#222 26px) 13px,
+    repeating-linear-gradient(90deg,#222 0px,#222 13px,#fff 13px,#fff 26px) 13px,
+    repeating-linear-gradient(90deg,#222 0px,#222 13px,#fff 13px,#fff 26px) 26px
+  );
+  background-size:26px 26px;
+}
+/* F1 cars – pure CSS */
+.f1car{
+  position:absolute;bottom:42px;
+  width:88px;height:34px;
+  animation:carZoom 2.8s cubic-bezier(.4,0,.2,1) forwards;
+}
+.f1car.car2{animation-delay:.55s;bottom:72px;}
+.f1car.car3{animation-delay:1.1s; bottom:42px;}
+@keyframes carZoom{
+  0%  {left:-120px;}
+  100%{left:calc(100% + 40px);}
+}
+/* car body */
+.car-body{
+  position:absolute;inset:0;
+  border-radius:4px 18px 4px 4px;
+  background:var(--c);
+  box-shadow:0 3px 10px rgba(0,0,0,.5);
+}
+.car-cockpit{
+  position:absolute;top:4px;left:38px;
+  width:22px;height:16px;
+  background:rgba(0,0,0,.6);
+  border-radius:3px 3px 2px 2px;
+  border:2px solid rgba(255,255,255,.2);
+}
+.car-nose{
+  position:absolute;top:12px;right:-16px;
+  width:18px;height:10px;
+  background:var(--c);
+  clip-path:polygon(0 0,100% 40%,100% 60%,0 100%);
+}
+.car-wing-f{
+  position:absolute;top:-4px;right:8px;
+  width:30px;height:5px;
+  background:var(--c);
+  border-radius:2px;
+  box-shadow:0 -2px 4px rgba(0,0,0,.4);
+}
+.car-wing-r{
+  position:absolute;top:-3px;left:6px;
+  width:18px;height:4px;
+  background:var(--c);
+  border-radius:1px;
+}
+.car-wheel{
+  position:absolute;bottom:-5px;
+  width:14px;height:14px;
+  background:#111;border-radius:50%;
+  border:2px solid #333;
+  box-shadow:0 2px 4px rgba(0,0,0,.5);
+}
+.car-wheel.wf{right:10px;}
+.car-wheel.wr{left:8px;}
+/* exhaust trail */
+.exhaust{
+  position:absolute;top:14px;left:-10px;
+  width:24px;height:6px;
+  background:linear-gradient(90deg,rgba(255,255,255,.7),transparent);
+  border-radius:3px;
+  animation:exhaustPuff .3s ease-out infinite alternate;
+}
+@keyframes exhaustPuff{
+  0%{width:20px;opacity:.6;}
+  100%{width:32px;opacity:.3;}
+}
+
+/* ═══ LOVE OVERLAY ═══ */
+.love-overlay{
+  position:fixed;inset:0;z-index:99;
+  /* Deep Blue with transparency */
+  background:linear-gradient(140deg, rgba(10, 26, 58, 0.95), rgba(214, 40, 40, 0.85));
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .5s ease;
+  cursor:pointer;
+}
+.love-overlay.show{opacity:1;pointer-events:auto;}
+
+.marquee-wrap{overflow:hidden;width:100%;padding:0 .4rem;margin-bottom:.8rem;}
+.marquee-track{display:flex;white-space:nowrap;animation:marquee 3.6s linear infinite;}
+.marquee-track span{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.6rem,9.5vw,5.2rem);font-weight:700;
+  color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.5);
+  padding:0 1.1rem;flex-shrink:0;
+}
+@keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+.overlay-emojis{
+  font-size:2.6rem;margin:0.7rem 0 .15rem;
+  animation:gentleBob 2s ease-in-out infinite;
+  filter:drop-shadow(0 3px 7px rgba(0,0,0,.2));
+}
+.boom-text{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.55rem,4.2vw,2.45rem);
+  color:#fff;font-style:italic;font-weight:700;
+  animation:boomPulse 1.15s ease-in-out infinite alternate;
+  text-shadow:0 2px 18px rgba(0,0,0,.5);
+  line-height:1.5;text-align:center;padding:0 1.4rem;
+}
+.boom-sub{
+  display:block;margin-top:.35rem;
+  font-size:clamp(.9rem,2vw,1.1rem);
+  font-weight:400;opacity:.9;color: var(--rb-yellow);
+}
+@keyframes boomPulse{0%{transform:scale(1);}100%{transform:scale(1.05);}}
+
+/* burst particles */
+.heart-burst-p{
+  position:absolute;pointer-events:none;
+  animation:burstFly .95s ease-out forwards;
+}
+@keyframes burstFly{
+  0%{transform:translate(0,0) scale(1);opacity:1;}
+  100%{transform:var(--ep) scale(0);opacity:0;}
+}
+</style>
+</head>
+<body>
+
+<audio id="yesSound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1539c.mp3" preload="auto"></audio>
+
+<div class="fate-msg" id="fateMsg">
+  <h2>⚠️ FATE RECALIBRATING...</h2>
+</div>
+
+<div class="float-bg" id="floatBg"></div>
+
+<div class="card-wrap">
+  <div class="card">
+
+    <div class="center-wrap">
+      <div class="glow-ring"></div>
+      <div class="center-inner">
+        <div class="emoji-cluster">
+           <span class="e">🌻</span>
+          <span class="e">🐤</span>
+          <span class="e">🏎️</span>
+          <span class="e">🐥</span>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="title">Hiii Bebuu✨</h1>
+    <p class="subtitle">I have something important to tell you first…</p>
+    <div class="divider"><div class="line"></div>🌻<div class="line"></div></div>
+    <p class="question">
+      I love you so, so much.<br/>
+      More than words could ever say.<br/><br/>
+      Thank you so much for everything…<br/>
+      for being <em>you</em>.<br/><br/>
+      I can't wait to be with you forever. 💝<br/><br/>
+      So… will you be <strong>my Valentine</strong>? <br/><b>(kinda forever👉👈🥹)<b><br/>
+    </p>
+
+    <div class="btn-arena" id="btnArena">
+      <button class="btn btn-yes" id="btnYes" onclick="onYes()">Yes! 💕</button>
+      <button class="btn btn-no"  id="btnNo">No 🥺</button>
+    </div>
+    <p class="miss-text" id="missText"><b<Hover over No… if you dare 😤<b></p>
+
+  </div>
+</div>
+
+<div class="race-layer" id="raceLayer">
+  <div class="track">
+    <div class="track-line"></div>
+    <div class="checkered"></div>
+  </div>
+</div>
+
+<canvas id="fw-canvas"></canvas>
+
+<div class="love-overlay" id="loveOverlay" onclick="onOverlayClick()">
+  <div class="marquee-wrap">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
+  <div class="overlay-emojis">🌻🐤🏎️🐥</div>
+  <div class="boom-text">
+    I love you my smol baby sharda<br/>
+    <span class="boom-sub">humesha humeshaaa ke liye, mera baby hai tu 💝</span>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   FLOATING EMOJIS
+ ═══════════════════════════════════════════════ */
+(function(){
+  const bg = document.getElementById('floatBg');
+  const pool = ['🌻','🐣','🐤','🐥','💕','💗','🌸','🏎️','💖','🌼','💝','🏎️'];
+  function spawn(){
+    const el = document.createElement('div');
+    el.className = 'floatie';
+    el.textContent = pool[Math.random()*pool.length|0];
+    el.style.left = Math.random()*100+'%';
+    el.style.animationDuration = (7+Math.random()*7)+'s';
+    el.style.animationDelay = Math.random()*1.4+'s';
+    el.style.fontSize = (.75+Math.random()*1.2)+'rem';
+    bg.appendChild(el);
+    setTimeout(()=>el.remove(), 18000);
+  }
+  for(let i=0;i<10;i++) setTimeout(spawn, i*420);
+  setInterval(spawn, 780);
+})();
+
+/* ═══════════════════════════════════════════════
+   NO BUTTON – ESCAPES, ANGER, & FATE RESET
+ ═══════════════════════════════════════════════ */
+(function(){
+  const arena = document.getElementById('btnArena');
+  const noBtn = document.getElementById('btnNo');
+  const miss  = document.getElementById('missText');
+  let escapes = 0;
+
+  // initial position
+  noBtn.style.position = 'absolute';
+  noBtn.style.left = '62%';
+  noBtn.style.top  = '28%';
+
+  function escapeFrom(mx, my){
+    escapes++;
+
+    /* --- LOGIC CHECK FOR ATTEMPTS --- */
+    if(escapes === 1) {
+      // 1. Angry Emoji & Message
+      noBtn.innerHTML = "😠 Stop Chasing the Wrong things";
+      noBtn.style.background = "var(--error-red)";
+      noBtn.style.color = "#fff";
+      noBtn.style.padding = "1rem 2rem";
+      noBtn.style.fontSize = "0.9rem";
+      miss.textContent = "I told you... 😠";
+      
+      // Still move it, but make it fit
+      moveButton(mx, my);
+      return;
+    }
+    
+    // INCREASED TO 10 ESCAPES BEFORE RESET
+    if(escapes === 10) {
+      // 10. THE FATE RESET (World Ending)
+      triggerFateReset();
+      return;
+    }
+    
+    // Normal evasion (Attempts 2 to 9)
+    if(escapes > 1 && escapes < 10) {
+      const msgs = ["Not this one! 💨", "Too slow! 😂", "Wrong choice! ⛔", "Nope! 🏎️", "Try again! 😜"];
+      noBtn.innerHTML = "No";
+      noBtn.style.background = "linear-gradient(135deg,#fcbf49,#f59f00)";
+      noBtn.style.color = "#5c3a00";
+      
+      // Cycle through messages
+      miss.textContent = msgs[(escapes-2) % msgs.length];
+      
+      // Shrink logic (slowly gets smaller)
+      // Only shrink on first few to avoid it vanishing too fast
+      const sizes = [
+        {f:'.90rem', p:'.70rem 1.8rem'},
+        {f:'.86rem', p:'.66rem 1.65rem'},
+        {f:'.80rem', p:'.60rem 1.45rem'},
+        {f:'.72rem', p:'.52rem 1.25rem'},
+        {f:'.64rem', p:'.44rem 1.05rem'},
+        {f:'.58rem', p:'.38rem .85rem'}
+      ];
+      let sizeIdx = Math.min(escapes - 2, sizes.length-1);
+      if(sizeIdx >= 0) {
+        noBtn.style.fontSize = sizes[sizeIdx].f;
+        noBtn.style.padding  = sizes[sizeIdx].p;
+      }
+      moveButton(mx, my);
+    }
+  }
+
+  function moveButton(mx, my) {
+    const ar  = arena.getBoundingClientRect();
+    const bw  = noBtn.offsetWidth, bh = noBtn.offsetHeight;
+    const pad = 6;
+    const maxL = ar.width  - bw  - pad;
+    const maxT = ar.height - bh  - pad;
+    const curL = noBtn.offsetLeft, curT = noBtn.offsetTop;
+    const curCX = curL+bw/2, curCY = curT+bh/2;
+    const mX = mx - ar.left, mY = my - ar.top;
+
+    let dx = curCX - mX, dy = curCY - mY;
+    const mag = Math.sqrt(dx*dx+dy*dy)||1;
+    dx/=mag; dy/=mag;
+
+    const jump = 88 + Math.random()*72;
+    let newL = curL + dx*jump + (Math.random()-.5)*78;
+    let newT = curT + dy*jump + (Math.random()-.5)*48;
+    newL = Math.max(pad, Math.min(maxL, newL));
+    newT = Math.max(pad, Math.min(maxT, newT));
+
+    noBtn.style.left = newL+'px';
+    noBtn.style.top  = newT+'px';
+  }
+
+  /* ═══════════════════════════════════════════════
+     DRAMATIC FATE RESET FUNCTION
+  ═══════════════════════════════════════════════ */
+  function triggerFateReset() {
+    // 1. Activate Apocalypse Mode
+    document.body.classList.add('apocalypse');
+    document.getElementById('fateMsg').classList.add('show');
+    miss.textContent = "RESETTING DESTINY...";
+    
+    // 2. Swirling Vortex of Specific Emojis
+    const pool = ['🌻','🐣','🐤','🐥','🏎️'];
+    const cnt = 80; // lots of emojis
+    const centerX = window.innerWidth/2;
+    const centerY = window.innerHeight/2;
+
+    for(let i=0; i<cnt; i++) {
+      const el = document.createElement('div');
+      el.className = 'swirl-emoji';
+      el.textContent = pool[Math.floor(Math.random()*pool.length)];
+      document.body.appendChild(el);
+
+      // Math for spiral
+      const angle = (i / cnt) * Math.PI * 12; // several loops
+      const radius = 10 + (i * 8); // expanding out
+      const duration = 2000 + Math.random()*1000;
+      
+      // Animate using WAAPI
+      const keyframes = [
+        { transform: `translate(-50%, -50%) rotate(0deg) scale(0)`, opacity: 0 },
+        { transform: `translate(calc(-50% + ${Math.cos(angle)*radius}px), calc(-50% + ${Math.sin(angle)*radius}px)) rotate(${angle*50}deg) scale(1.5)`, opacity: 1, offset: 0.8 },
+        { transform: `translate(calc(-50% + ${Math.cos(angle)*radius*2}px), calc(-50% + ${Math.sin(angle)*radius*2}px)) rotate(${angle*100}deg) scale(0)`, opacity: 0 }
+      ];
+      
+      const anim = el.animate(keyframes, {
+        duration: duration,
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+        delay: Math.random()*500
+      });
+
+      anim.onfinish = () => el.remove();
+    }
+
+    // 3. Reset Button State after chaos
+    setTimeout(() => {
+      window._resetNoBtn(); // Use the existing reset helper
+      document.body.classList.remove('apocalypse');
+      document.getElementById('fateMsg').classList.remove('show');
+    }, 3200);
+  }
+
+  // Desktop/Mouse events
+  arena.addEventListener('mousemove', function(e){
+    // don't run if resetting
+    if(document.body.classList.contains('apocalypse')) return;
+
+    const br = noBtn.getBoundingClientRect();
+    const fear = 22;
+    if(e.clientX>br.left-fear && e.clientX<br.right+fear &&
+       e.clientY>br.top-fear  && e.clientY<br.bottom+fear)
+      escapeFrom(e.clientX, e.clientY);
+  });
+  // Mobile events
+  arena.addEventListener('touchmove', function(e){
+    if(document.body.classList.contains('apocalypse')) return;
+    const t=e.touches[0], br=noBtn.getBoundingClientRect(), fear=26;
+    if(t.clientX>br.left-fear && t.clientX<br.right+fear &&
+       t.clientY>br.top-fear  && t.clientY<br.bottom+fear)
+      escapeFrom(t.clientX, t.clientY);
+  },{passive:true});
+  
+  // Click safety
+  noBtn.addEventListener('click', function(e){
+    e.preventDefault(); e.stopPropagation();
+    escapeFrom(e.clientX, e.clientY);
+  });
+
+  // Expose reset for global use
+  window._resetNoBtn = function(){
+    escapes = 0;
+    noBtn.innerHTML = "No";
+    noBtn.style.fontSize='1.02rem';
+    noBtn.style.padding='.82rem 2.1rem';
+    noBtn.style.background="linear-gradient(135deg,#fcbf49,#f59f00)";
+    noBtn.style.color="#5c3a00";
+    noBtn.style.opacity=1;
+    noBtn.style.left='62%';
+    noBtn.style.top='28%';
+    miss.textContent='hover over No… if you dare 😡';
+  };
+})();
+
+/* ═══════════════════════════════════════════════
+   F1 RACE
+ ═══════════════════════════════════════════════ */
+function launchRace(){
+  const layer = document.getElementById('raceLayer');
+  // clear old cars
+  layer.querySelectorAll('.f1car').forEach(c=>c.remove());
+
+  const cars = [
+    {color:'#0a1a3a', delay:0,    lane:'42px'},   // Deep Blue (Winner)
+    {color:'#d62828', delay:520,  lane:'72px'},   // Red
+    {color:'#fcbf49', delay:1050, lane:'42px'}    // Yellow
+  ];
+
+  cars.forEach((car,i)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'f1car' + (i===1?' car2':'') + (i===2?' car3':'');
+    wrap.style.animationDelay = car.delay+'ms';
+    wrap.style.bottom = car.lane;
+    wrap.style.setProperty('--c', car.color);
+
+    wrap.innerHTML = `
+      <div class="exhaust"></div>
+      <div class="car-body" style="background:${car.color}"></div>
+      <div class="car-cockpit"></div>
+      <div class="car-nose"  style="background:${car.color}"></div>
+      <div class="car-wing-f" style="background:${car.color}"></div>
+      <div class="car-wing-r" style="background:${car.color}"></div>
+      <div class="car-wheel wf"></div>
+      <div class="car-wheel wr"></div>
+    `;
+    layer.appendChild(wrap);
+  });
+
+  layer.classList.add('show');
+  setTimeout(()=> layer.classList.remove('show'), 5200);
+}
+
+/* ═══════════════════════════════════════════════
+   YES → FIREWORKS + RACE + OVERLAY + SOUND
+ ═══════════════════════════════════════════════ */
+let fireworksRunning = false;
+
+function onYes(){
+  // 1. Play Sound
+  const audio = document.getElementById('yesSound');
+  if(audio) {
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log("Audio autoplay blocked needs interaction first"));
+  }
+
+  const yBtn = document.getElementById('btnYes');
+  yBtn.style.transform = 'translate(-50%,-50%) scale(1.18)';
+
+  // marquee
+  const track = document.getElementById('marqueeTrack');
+  const words = [
+    'I LOVE YOU ❤️',
+    '💕 YOU MY BABY 💕',
+    '— Forever & Ever —',
+    'My Smol Smol Baby ✨',
+    'I LOVE YOU ❤️',
+    '💕 YOU MY BABY 💕',
+    '— Forever & Ever —',
+    'My Smol Smol Baby ✨'
+  ];
+  track.innerHTML = words.map(w=>`<span>${w}</span>`).join('');
+
+  setTimeout(()=>{
+    document.getElementById('loveOverlay').classList.add('show');
+    spawnHeartBurst();
+    launchRace();
+    if(!fireworksRunning){ fireworksRunning=true; startFireworks(); }
+  }, 360);
+}
+
+/* burst particles */
+function spawnHeartBurst(){
+  const ov = document.getElementById('loveOverlay');
+  const em = ['💕','💗','💖','💝','🌻','🐣','🐤','🐥','🏎️','🏎️'];
+  for(let i=0;i<18;i++){
+    const p = document.createElement('div');
+    p.className = 'heart-burst-p';
+    p.textContent = em[Math.random()*em.length|0];
+    p.style.left='50%'; p.style.top='50%';
+    const a = (Math.PI*2/18)*i+(Math.random()-.5)*.3;
+    const d = 100+Math.random()*160;
+    p.style.setProperty('--ep',`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`);
+    p.style.fontSize=(.8+Math.random()*.95)+'rem';
+    ov.appendChild(p);
+    setTimeout(()=>p.remove(), 1050);
+  }
+}
+
+/* click overlay → reset */
+function onOverlayClick(){
+  document.getElementById('loveOverlay').classList.remove('show');
+  document.getElementById('btnYes').style.transform = 'translate(-50%,-50%)';
+  window._resetNoBtn();
+}
+
+/* ═══════════════════════════════════════════════
+   FIREWORKS ENGINE
+ ═══════════════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('fw-canvas');
+  const ctx    = canvas.getContext('2d');
+  let particles = [];
+
+  function resize(){ canvas.width=innerWidth; canvas.height=innerHeight; }
+  addEventListener('resize',resize); resize();
+
+  class Particle{
+    constructor(x,y,hue){
+      this.x=x;this.y=y;
+      const a=Math.random()*Math.PI*2, s=1.2+Math.random()*3.6;
+      this.vx=Math.cos(a)*s;this.vy=Math.sin(a)*s;
+      this.alpha=1;this.hue=hue+(Math.random()-.5)*35;
+      this.size=1.6+Math.random()*2.4;
+      this.decay=.006+Math.random()*0.014;
+    }
+    update(){this.vy+=.04;this.x+=this.vx;this.y+=this.vy;this.alpha-=this.decay;}
+    draw(){
+      ctx.globalAlpha=this.alpha;
+      ctx.fillStyle=`hsl(${this.hue},90%,62%)`;
+      ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();
+    }
+  }
+
+  function explode(x,y){
+    // mix of pinks and warm golds
+    const hue = Math.random()<.5 ? (Math.random()*40+330) : (Math.random()*30+35);
+    for(let i=0;i<72;i++) particles.push(new Particle(x,y,hue));
+  }
+
+  function loop(){
+    if(!fireworksRunning) return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(document.getElementById('loveOverlay').classList.contains('show') && Math.random()<.065)
+      explode(canvas.width*.08+Math.random()*canvas.width*.84, canvas.height*.06+Math.random()*canvas.height*.52);
+    for(let i=particles.length-1;i>=0;i--){
+      particles[i].update();particles[i].draw();
+      if(particles[i].alpha<=0) particles.splice(i,1);
+    }
+    ctx.globalAlpha=1;
+    requestAnimationFrame(loop);
+  }
+
+  window.startFireworks = function(){
+    for(let i=0;i<8;i++) setTimeout(()=>explode(
+      canvas.width*.1+Math.random()*canvas.width*.8,
+      canvas.height*.06+Math.random()*canvas.height*.44
+    ), i*155);
+    loop();
+  };
+})();
+</script>
+</body>
+</html>
